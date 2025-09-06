@@ -17,11 +17,16 @@ class UtkSession:
         self.cookies = {}
 
     def login(self, uid: str, pwd: str) -> bool:
-        # 1. CSRF token लो
-        r = requests.get('https://online.utkarsh.com/web/home/get_states', timeout=30)
-        self.token = r.json()['token']
+        # 1. CSRF token lo
+        try:
+            r = requests.get('https://online.utkarsh.com/web/home/get_states', timeout=30)
+            data = r.json()
+            self.token = data.get('token')
+        except Exception as e:
+            print("❌ CSRF token fetch failed:", e, r.text if 'r' in locals() else "")
+            return False
 
-        # 2. लॉगिन करो
+        # 2. Login request
         data = f"csrf_name={self.token}&mobile={uid}&url=0&password={pwd}&submit=LogIn&device_token=null"
         headers = {
             'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -31,9 +36,29 @@ class UtkSession:
         r = requests.post('https://online.utkarsh.com/web/Auth/login',
                           headers=headers, data=data, timeout=30)
 
-        # 3. जवाब decrypt करो
-        enc = r.json()['response'].replace('MDE2MTA4NjQxMDI3NDUxNQ==', '==').replace(':', '==')
-        dec = json.loads(decrypt(enc))
+        # 3. Debug raw response
+        print("🔎 RAW LOGIN RESPONSE:", r.text)
+
+        # 4. Try parsing JSON
+        try:
+            j = r.json()
+        except Exception:
+            print("❌ JSON parse failed. Response text:", r.text)
+            return False
+
+        if 'response' not in j:
+            print("❌ 'response' field missing in JSON:", j)
+            return False
+
+        # 5. Decrypt
+        try:
+            enc = j['response'].replace('MDE2MTA4NjQxMDI3NDUxNQ==', '==').replace(':', '==')
+            dec = json.loads(decrypt(enc))
+            print("✅ Decrypted response:", dec)
+        except Exception as e:
+            print("❌ Decrypt failed:", e, "Raw JSON:", j)
+            return False
+
         if dec.get('status'):
             self.cookies = dict(r.cookies)
             return True
