@@ -54,26 +54,31 @@ def is_authorized(user_id: int) -> bool:
 
 bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# ======================================================
-#  NEW COMMAND – ParseMode.HTML fixed
-# ======================================================
-@bot.on_message(filters.command("utkarshlogin"))
-async def utk_login(_, m: Message):
-    if not is_authorized(m.from_user.id):
-        return await m.reply("🚫 Not allowed.")
+# ==============================
+# Utkarsh Login Command
+# ==============================
+@app.on_message(filters.command("utkarshlogin") & filters.private)
+async def utk_login(client, m):
     try:
         uid, pwd = m.text.split(" ", 1)[1].split("*", 1)
     except ValueError:
-        return await m.reply("💡 Use: <code>/utkarshlogin ID*PASSWORD</code>", parse_mode=ParseMode.HTML)
-    rep = await m.reply("🔄 Logging in…")
+        return await m.reply(
+            "💡 Use: <code>/utkarshlogin ID*PASSWORD</code>",
+            parse_mode=ParseMode.HTML
+        )
+
+    rep = await m.reply("🔄 Logging in…")   # ✅ ab sahi jagah par hai
+
     ok = utk.login(uid, pwd)
-if ok:
-    await rep.edit(
-        "✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.",
-        parse_mode=ParseMode.HTML
-    )
-else:
-    await rep.edit("❌ Login failed – wrong ID/PASS")
+
+    if ok:
+        await rep.edit(
+            "✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.",
+            parse_mode=ParseMode.HTML
+        )
+    else:
+        await rep.edit("❌ Login failed – wrong ID/PASS")
+
 
 
 # ==============================
