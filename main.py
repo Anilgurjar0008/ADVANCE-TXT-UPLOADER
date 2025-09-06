@@ -67,7 +67,7 @@ async def utk_login(_, m: Message):
         return await m.reply("💡 Use: <code>/utkarshlogin ID*PASSWORD</code>", parse_mode=ParseMode.HTML)
     rep = await m.reply("🔄 Logging in…")
     ok = utk.login(uid, pwd)
-    if ok:
+if ok:
             await rep.edit(
         "✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.",
         parse_mode=ParseMode.HTML
