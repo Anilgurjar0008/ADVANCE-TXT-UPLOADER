@@ -5,9 +5,9 @@
 # 2.  /utkarshlogin command added
 # 3.  Utkarsh CDN URLs auto-fixed (no 403)
 # 4.  file-exists check before ffmpeg
+# 5.  ParseMode.HTML fixed (no crash)
 # ==========================================
 
-# ---- existing imports ----
 import os, re, sys, json, time, m3u8, aiohttp, asyncio, requests, subprocess, urllib.parse, cloudscraper, datetime, random, ffmpeg, logging, yt_dlp
 from subprocess import getstatusoutput
 from aiohttp import web
@@ -29,6 +29,7 @@ from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.enums import ParseMode          # ← NEW
 # ------------------------------------------
 #  NEW: import Utkarsh session helper
 # ------------------------------------------
@@ -46,7 +47,7 @@ async def show_random_emojis(message):
 
 OWNER_ID = 5371688792
 SUDO_USERS = [5371688792]
-AUTH_CHANNELS = [ -1002221280166,-1002492607383]
+AUTH_CHANNELS = [-1002221280166, -1002492607383]
 
 def is_authorized(user_id: int) -> bool:
     return (user_id == OWNER_ID or user_id in SUDO_USERS or user_id in AUTH_CHANNELS)
@@ -54,7 +55,7 @@ def is_authorized(user_id: int) -> bool:
 bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # ======================================================
-#  NEW COMMAND – 1 line to add
+#  NEW COMMAND – ParseMode.HTML fixed
 # ======================================================
 @bot.on_message(filters.command("utkarshlogin"))
 async def utk_login(_, m: Message):
@@ -63,11 +64,11 @@ async def utk_login(_, m: Message):
     try:
         uid, pwd = m.text.split(" ", 1)[1].split("*", 1)
     except ValueError:
-        return await m.reply("💡 Use: <code>/utkarshlogin ID*PASSWORD</code>", parse_mode="html")
+        return await m.reply("💡 Use: <code>/utkarshlogin ID*PASSWORD</code>", parse_mode=ParseMode.HTML)
     rep = await m.reply("🔄 Logging in…")
     ok = utk.login(uid, pwd)
     if ok:
-        await rep.edit("✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.", parse_mode="html")
+        await rep.edit("✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.", parse_mode=ParseMode.HTML)
     else:
         await rep.edit("❌ Login failed – wrong ID/PASS.")
 
@@ -105,29 +106,29 @@ async def sudo_command(bot: Client, message: Message):
     except Exception as e:
         await message.reply_text(f"**Error:** {str(e)}")
 
-keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🇮🇳ʙᴏᴛ ᴍᴀᴅᴇ ʙʏ🇮🇳", url="https://t.me/Tushar0125")],
-                                 [InlineKeyboardButton("🔔ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ🔔", url="https://t.me/TxtToVideoUpdateChannel")],
-                                 [InlineKeyboardButton("🦋ғᴏʟʟᴏᴡ ᴜs🦋", url="https://t.me/TxtToVideoUpdateChannel")]])
+keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🇮🇳ʙᴏᴛ ᴍᴀᴅᴇ ʙʏ🇮🇳", url="https://t.me/Tushar0125 ")],
+                                 [InlineKeyboardButton("🔔ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ🔔", url="https://t.me/TxtToVideoUpdateChannel ")],
+                                 [InlineKeyboardButton("🦋ғᴏʟʟᴏᴡ ᴜs🦋", url="https://t.me/TxtToVideoUpdateChannel ")]])
 
-image_urls = ["https://graph.org/file/996d4fc24564509244988-a7d93d020c96973ba8.jpg",
-              "https://graph.org/file/96d25730136a3ea7e48de-b0a87a529feb485c8f.jpg",
-              "https://graph.org/file/6593f76ddd8c735ae3ce2-ede9fa2df40079b8a0.jpg",
-              "https://graph.org/file/a5dcdc33020aa7a488590-79e02b5a397172cc35.jpg",
-              "https://graph.org/file/0346106a432049e391181-7560294e8652f9d49d.jpg",
-              "https://graph.org/file/ba49ebe9a8e387addbcdc-be34c4cd4432616699.jpg",
-              "https://graph.org/file/26f98dec8b3966687051f-557a430bf36b660e24.jpg",
-              "https://graph.org/file/2ae78907fa4bbf3160ffa-2d69cd23fa75cb0c3a.jpg",
-              "https://graph.org/file/05ef9478729f165809dd7-3df2f053d2842ed098.jpg",
-              "https://graph.org/file/b1330861fed21c4d7275c-0f95cca72c531382c1.jpg",
-              "https://graph.org/file/0ebb95807047b062e402a-9e670a0821d74e3306.jpg",
-              "https://graph.org/file/b4e5cfd4932d154ad6178-7559c5266426c0a399.jpg",
-              "https://graph.org/file/44ffab363c1a2647989bc-00e22c1e36a9fd4156.jpg",
-              "https://graph.org/file/5f0980969b54bb13f2a8a-a3e131c00c81c19582.jpg",
-              "https://graph.org/file/6341c0aa94c803f94cdb5-225b2999a89ff87e39.jpg",
-              "https://graph.org/file/90c9f79ec52e08e5a3025-f9b73e9d17f3da5040.jpg",
-              "https://graph.org/file/1aaf27a49b6bd81692064-30016c0a382f9ae22b.jpg",
-              "https://graph.org/file/702aa31236364e4ebb2be-3f88759834a4b164a0.jpg",
-              "https://graph.org/file/d0c6b9f6566a564cd7456-27fb594d26761d3dc0.jpg"]
+image_urls = ["https://graph.org/file/996d4fc24564509244988-a7d93d020c96973ba8.jpg ",
+              "https://graph.org/file/96d25730136a3ea7e48de-b0a87a529feb485c8f.jpg ",
+              "https://graph.org/file/6593f76ddd8c735ae3ce2-ede9fa2df40079b8a0.jpg ",
+              "https://graph.org/file/a5dcdc33020aa7a488590-79e02b5a397172cc35.jpg ",
+              "https://graph.org/file/0346106a432049e391181-7560294e8652f9d49d.jpg ",
+              "https://graph.org/file/ba49ebe9a8e387addbcdc-be34c4cd4432616699.jpg ",
+              "https://graph.org/file/26f98dec8b3966687051f-557a430bf36b660e24.jpg ",
+              "https://graph.org/file/2ae78907fa4bbf3160ffa-2d69cd23fa75cb0c3a.jpg ",
+              "https://graph.org/file/05ef9478729f165809dd7-3df2f053d2842ed098.jpg ",
+              "https://graph.org/file/b1330861fed21c4d7275c-0f95cca72c531382c1.jpg ",
+              "https://graph.org/file/0ebb95807047b062e402a-9e670a0821d74e3306.jpg ",
+              "https://graph.org/file/b4e5cfd4932d154ad6178-7559c5266426c0a399.jpg ",
+              "https://graph.org/file/44ffab363c1a2647989bc-00e22c1e36a9fd4156.jpg ",
+              "https://graph.org/file/5f0980969b54bb13f2a8a-a3e131c00c81c19582.jpg ",
+              "https://graph.org/file/6341c0aa94c803f94cdb5-225b2999a89ff87e39.jpg ",
+              "https://graph.org/file/90c9f79ec52e08e5a3025-f9b73e9d17f3da5040.jpg ",
+              "https://graph.org/file/1aaf27a49b6bd81692064-30016c0a382f9ae22b.jpg ",
+              "https://graph.org/file/702aa31236364e4ebb2be-3f88759834a4b164a0.jpg ",
+              "https://graph.org/file/d0c6b9f6566a564cd7456-27fb594d26761d3dc0.jpg "]
 
 random_image_url = random.choice(image_urls)
 caption = ("**ʜᴇʟʟᴏ👋**\n\n"
@@ -338,7 +339,7 @@ async def upload(bot: Client, m: Message):
     input3: Message = await bot.listen(editable.chat.id)
     raw_text3 = input3.text
     await input3.delete(True)
-    credit = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/Tushar0125)"
+    credit = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/Tushar0125 )"
     if raw_text3 == '1':
         CR = credit
     else:
@@ -354,7 +355,7 @@ async def upload(bot: Client, m: Message):
     await input4.delete(True)
     MR = token if raw_text4 == '3' else raw_text4
 
-    await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼")
+    await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg \n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼")
     input6 = await bot.listen(editable.chat.id)
     raw_text6 = input6.text
     await input6.delete(True)
@@ -452,13 +453,20 @@ async def upload(bot: Client, m: Message):
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
 
             elif "webvideos.classplusapp." in url:
-                cmd = f'yt-dlp --add-header "referer:https://web.classplusapp.com/" --add-header "x-cdn-tag:empty" -f "{ytf}" "{url}" -o "{name}.mp4"'
+                cmd = f'yt-dlp --add-header "referer:https://web.classplusapp.com/ " --add-header "x-cdn-tag:empty" -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             elif "youtube.com" in url or "youtu.be" in url:
                 cmd = f'yt-dlp --cookies youtube_cookies.txt -f "{ytf}" "{url}" -o "{name}".mp4'
 
             else:
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
+
+            # ---------- सेफ्टी चेक ----------
+            name1 = links[i][0].replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
+            if not name1:                       # ← ये 2 लाइनें डाल दीजिए
+                name1 = "Unknown_Title"
+            name = f'{str(count).zfill(3)}) {name1[:60]}'
+            # ---------------------------------
 
             try:
                 cc = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
