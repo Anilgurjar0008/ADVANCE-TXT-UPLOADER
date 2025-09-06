@@ -44,9 +44,9 @@ async def show_random_emojis(message):
     emoji_message = await message.reply_text(''.join(random.choices(emojis, k=1)))
     return emoji_message
 
-OWNER_ID = 5840594311
-SUDO_USERS = [5840594311]
-AUTH_CHANNELS = [-1002605113558,-1002663510614]
+OWNER_ID = 5371688792
+SUDO_USERS = [5371688792]
+AUTH_CHANNELS = [ -1002221280166,-1002492607383]
 
 def is_authorized(user_id: int) -> bool:
     return (user_id == OWNER_ID or user_id in SUDO_USERS or user_id in AUTH_CHANNELS)
