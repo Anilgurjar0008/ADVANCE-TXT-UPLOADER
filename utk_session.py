@@ -13,13 +13,14 @@ def decrypt(enc: str) -> str:
 
 class UtkSession:
     def __init__(self):
+        self.session = requests.Session()   # ✅ Cookie handling enabled
         self.token   = None
         self.cookies = {}
 
     def login(self, uid: str, pwd: str) -> bool:
         try:
             # 1. CSRF token लो
-            r = requests.get('https://online.utkarsh.com/web/home/get_states', timeout=30)
+            r = self.session.get('https://online.utkarsh.com/web/home/get_states', timeout=30)
             if r.status_code != 200:
                 print("⚠️ CSRF Request Failed:", r.status_code, r.text)
                 return False
@@ -29,7 +30,7 @@ class UtkSession:
                 print("⚠️ CSRF Token missing in response:", r.text)
                 return False
 
-            # 2. लॉगिन करो
+            # 2. लॉगिन करो (session se cookies auto carry hogi)
             data = f"csrf_name={self.token}&mobile={uid}&url=0&password={pwd}&submit=LogIn&device_token=null"
             headers = {
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -39,11 +40,10 @@ class UtkSession:
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             }
 
-            r = requests.post('https://online.utkarsh.com/web/Auth/login',
-                              headers=headers, data=data, timeout=30)
+            r = self.session.post('https://online.utkarsh.com/web/Auth/login',
+                                  headers=headers, data=data, timeout=30)
 
-            # Debug print (server ka raw response)
-            print("🔎 RAW LOGIN RESPONSE:", r.text[:500])
+            print("🔎 RAW LOGIN RESPONSE:", r.text[:500])  # Debug
 
             # 3. Agar response JSON nahi hai to fail
             try:
@@ -62,7 +62,7 @@ class UtkSession:
             dec = json.loads(decrypt(enc))
 
             if dec.get('status'):
-                self.cookies = dict(r.cookies)
+                self.cookies = self.session.cookies.get_dict()   # ✅ session se save karo
                 print("✅ Login Success!")
                 return True
             else:
