@@ -68,9 +68,54 @@ async def utk_login(_, m: Message):
     rep = await m.reply("🔄 Logging in…")
     ok = utk.login(uid, pwd)
     if ok:
-        await rep.edit("✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.", parse_mode=ParseMode.HTML)
-    else:
-        await rep.edit("❌ Login failed – wrong ID/PASS.")
+            await rep.edit(
+        "✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.",
+        parse_mode=ParseMode.HTML
+    )
+else:
+    await rep.edit("❌ Login failed – wrong ID/PASS")
+
+
+# ==============================
+# Handle TXT after login
+# ==============================
+@app.on_message(filters.document & filters.private)
+async def handle_txt(client, message):
+    global utk_session
+    if not utk_session:
+        return await message.reply("⚠️ Please login first using /utkarshlogin ID*Password")
+
+    if not message.document.file_name.endswith(".txt"):
+        return await message.reply("❌ Please send a valid .txt file with Utkarsh links.")
+
+    # Download file
+    file_path = await message.download()
+    await message.reply("📥 File received! Processing...")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            links = [line.strip() for line in f if line.strip()]
+
+        if not links:
+            return await message.reply("⚠️ The file is empty!")
+
+        await message.reply(
+            f"✅ Got <b>{len(links)}</b> links. Starting extraction...",
+            parse_mode=ParseMode.HTML
+        )
+
+        # 👇 Yaha tum apna extraction code call karna hoga
+        # for link in links:
+        #     process_utkarsh_link(link, utk_session.headers())
+
+    except Exception as e:
+        await message.reply(
+            f"🔥 Error while processing file:\n<code>{e}</code>",
+            parse_mode=ParseMode.HTML
+        )
+    finally:
+        os.remove(file_path)
+
 
 # ======================================================
 #  keep existing handlers (sudo, start, help …)
