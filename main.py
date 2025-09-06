@@ -63,11 +63,11 @@ async def utk_login(_, m: Message):
     try:
         uid, pwd = m.text.split(" ", 1)[1].split("*", 1)
     except ValueError:
-        return await m.reply("💡 Use: <code>/utkarshlogin ID*PASSWORD</code>", parse_mode="html")
+        return await m.reply("💡 Use: <code>/utkarshlogin ID*PASSWORD</code>", parse_mode="HTML")
     rep = await m.reply("🔄 Logging in…")
     ok = utk.login(uid, pwd)
     if ok:
-        await rep.edit("✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.", parse_mode="html")
+        await rep.edit("✅ Login successful!\nNow send me the <b>.txt</b> file with Utkarsh links.", parse_mode="HTML")
     else:
         await rep.edit("❌ Login failed – wrong ID/PASS.")
 
